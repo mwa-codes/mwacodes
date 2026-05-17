@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// @ts-expect-error next-pwa ships without TypeScript declarations
+import withPWA from "next-pwa";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,4 +12,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+})(nextConfig);
