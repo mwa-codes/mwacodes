@@ -7,9 +7,10 @@ import { AddLinkInput } from "../components/AddLinkInput";
 import { ClockWidget } from "../components/ClockWidget";
 import { GitHubWidget } from "../components/GitHubWidget";
 import { SavedLinksWidget } from "../components/SavedLinksWidget";
+import { ScratchpadWidget } from "../components/ScratchpadWidget";
 import { WeatherWidget } from "../components/WeatherWidget";
 
-const STAGGER_MS = [0, 80, 160, 240, 320] as const;
+const STAGGER_MS = [0, 80, 160, 240, 320, 400] as const;
 
 function DashboardCard({
   children,
@@ -96,6 +97,12 @@ export default function DashboardPage() {
         >
           <DashboardCard delayIndex={4}>
             <SavedLinksWidget refreshTrigger={refreshTrigger} />
+          </DashboardCard>
+        </section>
+
+        <section className="dashboard-slot--scratchpad" aria-label="Scratchpad">
+          <DashboardCard delayIndex={5}>
+            <ScratchpadWidget />
           </DashboardCard>
         </section>
       </main>

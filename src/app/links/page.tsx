@@ -10,6 +10,7 @@ import {
   LINK_TYPE_LABELS,
   type LinkTypeFilter,
 } from "@/lib/link-display";
+import { supabase } from "@/lib/supabase";
 import type { SavedLink } from "@/types/link";
 
 const SEARCH_DEBOUNCE_MS = 400;
@@ -227,6 +228,25 @@ export default function LinksPage() {
     };
   }, [debouncedSearch, activeType]);
 
+  const handleExport = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("links")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !data) return;
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    const date = new Date().toISOString().slice(0, 10);
+    anchor.href = url;
+    anchor.download = `mwa-links-${date}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
   const handleDelete = useCallback(async (id: string) => {
     setDeletingId(id);
 
@@ -265,12 +285,29 @@ export default function LinksPage() {
           <Link className="links-page__back" href="/">
             ← Dashboard
           </Link>
-          <div className="links-page__intro">
-            <h1 className="links-page__title">Your library</h1>
-            <p className="links-page__subtitle">
-              Browse everything you&apos;ve saved — articles, videos, repos, and
-              more.
-            </p>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: "1rem",
+            }}
+          >
+            <div className="links-page__intro">
+              <h1 className="links-page__title">Your library</h1>
+              <p className="links-page__subtitle">
+                Browse everything you&apos;ve saved — articles, videos, repos,
+                and more.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="links-filter"
+              onClick={handleExport}
+            >
+              ↓ Export
+            </button>
           </div>
         </header>
 

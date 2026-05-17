@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { GitHubCalendar } from "react-github-calendar";
 import type { GitHubApiSuccess } from "../app/api/github/route";
 
 export type GitHubWidgetProps = {
@@ -172,6 +173,32 @@ export function GitHubWidget({ className }: GitHubWidgetProps) {
           </li>
         ))}
       </ul>
+
+      <div style={{ marginTop: "1rem" }}>
+        <span
+          style={{
+            display: "block",
+            fontSize: "0.55rem",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--fg-dim)",
+            marginBottom: "0.5rem",
+          }}
+        >
+          Contributions
+        </span>
+        <div style={{ overflowX: "auto" }}>
+          <GitHubCalendar
+            username={process.env.NEXT_PUBLIC_GITHUB_USERNAME || "mwa-codes"}
+            colorScheme="dark"
+            blockSize={10}
+            blockMargin={3}
+            blockRadius={2}
+            fontSize={12}
+            style={{ maxWidth: "100%" }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -59,9 +59,9 @@ function getHour(date: Date, tz?: string): number {
 
 function getGreeting(date: Date, tz?: string): string {
   const hour = getHour(date, tz);
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
+  if (hour < 12) return "Good morning, MWA";
+  if (hour < 17) return "Good afternoon, MWA";
+  return "Good evening, MWA";
 }
 
 function getQuoteIndex(date: Date, tz?: string): number {

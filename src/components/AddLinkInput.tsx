@@ -46,6 +46,27 @@ export function AddLinkInput({ onLinkSaved, className }: AddLinkInputProps) {
     return () => window.clearInterval(interval);
   }, [status]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "/") return;
+
+      const active = document.activeElement;
+      if (
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement ||
+        active instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+      inputRef.current?.focus();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const resetToIdle = useCallback(() => {
     setStatus("idle");
     setLoadingStep(0);
@@ -115,7 +136,7 @@ export function AddLinkInput({ onLinkSaved, className }: AddLinkInputProps) {
             inputMode="url"
             autoComplete="off"
             spellCheck={false}
-            placeholder="Paste any URL to save it..."
+            placeholder="Paste any URL to save...  [ / ]"
             value={url}
             disabled={isLoading || isSuccess}
             onChange={(event) => {
