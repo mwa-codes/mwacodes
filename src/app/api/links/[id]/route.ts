@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseForWrites } from "@/lib/supabase-server";
+import { getSupabaseServer } from "@/lib/supabase-server";
 
 export type DeleteLinkResponse = {
   success: true;
@@ -27,7 +27,7 @@ export async function DELETE(
   let count: number | null = null;
 
   try {
-    const result = await getSupabaseForWrites()
+    const result = await getSupabaseServer()
       .from("links")
       .delete({ count: "exact" })
       .eq("id", id);

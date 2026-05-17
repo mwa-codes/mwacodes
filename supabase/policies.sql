@@ -1,5 +1,7 @@
--- Run in Supabase → SQL Editor if you prefer the anon key over service_role on the server.
+-- Run in Supabase → SQL Editor if you do NOT use SUPABASE_SERVICE_ROLE_KEY on the server.
 -- Enables read/write/delete for the links table via SUPABASE_ANON_KEY.
+-- If you use the service role for saves, you still need either this SELECT policy or
+-- service role on GET — the app uses service role for all API routes when configured.
 
 alter table public.links enable row level security;
 

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import type { FetchMetaResponse } from "@/app/api/fetch-meta/route";
 import type { TagLinkResponse } from "@/app/api/tag-link/route";
-import { supabase } from "@/lib/supabase";
-import { getSupabaseForWrites } from "@/lib/supabase-server";
+import { getSupabaseServer } from "@/lib/supabase-server";
 import type { SavedLink } from "@/types/link";
 
 export type LinksApiError = {
@@ -93,7 +92,7 @@ export async function GET(
     return NextResponse.json({ error: "Invalid type filter" }, { status: 400 });
   }
 
-  let query = supabase
+  let query = getSupabaseServer()
     .from("links")
     .select("*")
     .order("created_at", { ascending: false });
@@ -156,7 +155,7 @@ export async function POST(
       url,
     );
 
-    const { data, error } = await getSupabaseForWrites()
+    const { data, error } = await getSupabaseServer()
       .from("links")
       .insert({
         url,

@@ -27,7 +27,13 @@ export function getSupabaseAdmin(): SupabaseClient | null {
   return adminClient;
 }
 
-/** Prefer service role; fall back to anon (requires supabase/policies.sql). */
-export function getSupabaseForWrites(): SupabaseClient {
+/**
+ * Server-side DB client for API routes.
+ * Uses service role when set (bypasses RLS); otherwise anon (requires policies.sql).
+ */
+export function getSupabaseServer(): SupabaseClient {
   return getSupabaseAdmin() ?? supabase;
 }
+
+/** @deprecated Use getSupabaseServer */
+export const getSupabaseForWrites = getSupabaseServer;
