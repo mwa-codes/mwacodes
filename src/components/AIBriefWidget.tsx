@@ -1,16 +1,72 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import type { AIBriefApiSuccess } from "../app/api/ai-brief/route";
 
 export type AIBriefWidgetProps = {
   className?: string;
 };
 
+const STORAGE_KEY = "ai_brief";
+
+type CachedBrief = {
+  text: string;
+  date: string;
+  generatedAt: string;
+};
+
 type FetchState =
   | { status: "loading" }
-  | { status: "success"; data: AIBriefApiSuccess }
+  | { status: "success"; data: AIBriefApiSuccess; fromCache: boolean }
   | { status: "error"; message: string };
+
+function getTodayKey(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function readCachedBrief(): CachedBrief | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CachedBrief;
+    if (
+      typeof parsed.text !== "string" ||
+      typeof parsed.date !== "string" ||
+      typeof parsed.generatedAt !== "string"
+    ) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedBrief(text: string, generatedAt: string): void {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      text,
+      date: getTodayKey(),
+      generatedAt,
+    } satisfies CachedBrief),
+  );
+}
+
+function cachedToSuccess(text: string, generatedAt: string): AIBriefApiSuccess {
+  return { brief: text, generatedAt };
+}
+
+function formatGeneratedTime(iso: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
 
 async function fetchBriefData(): Promise<AIBriefApiSuccess> {
   const response = await fetch("/api/ai-brief", { method: "POST" });
@@ -59,13 +115,34 @@ function AIBriefSkeleton() {
 export function AIBriefWidget({ className }: AIBriefWidgetProps) {
   const [state, setState] = useState<FetchState>({ status: "loading" });
 
-  useEffect(() => {
+  const loadBrief = useCallback(
+    async (
+      force: boolean,
+    ): Promise<{ data: AIBriefApiSuccess; fromCache: boolean }> => {
+      if (!force) {
+        const cached = readCachedBrief();
+        if (cached?.date === getTodayKey()) {
+          return {
+            data: cachedToSuccess(cached.text, cached.generatedAt),
+            fromCache: true,
+          };
+        }
+      }
+
+      const data = await fetchBriefData();
+      writeCachedBrief(data.brief, data.generatedAt);
+      return { data, fromCache: false };
+    },
+    [],
+  );
+
+  useLayoutEffect(() => {
     let cancelled = false;
 
-    fetchBriefData()
-      .then((data) => {
+    loadBrief(false)
+      .then(({ data, fromCache }) => {
         if (!cancelled) {
-          setState({ status: "success", data });
+          setState({ status: "success", data, fromCache });
         }
       })
       .catch((err: unknown) => {
@@ -81,14 +158,14 @@ export function AIBriefWidget({ className }: AIBriefWidgetProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadBrief]);
 
   const handleRefresh = useCallback(() => {
     setState({ status: "loading" });
 
-    fetchBriefData()
-      .then((data) => {
-        setState({ status: "success", data });
+    loadBrief(true)
+      .then(({ data, fromCache }) => {
+        setState({ status: "success", data, fromCache });
       })
       .catch((err: unknown) => {
         setState({
@@ -97,7 +174,7 @@ export function AIBriefWidget({ className }: AIBriefWidgetProps) {
             err instanceof Error ? err.message : "Unable to reach AI service",
         });
       });
-  }, []);
+  }, [loadBrief]);
 
   const isLoading = state.status === "loading";
 
@@ -109,8 +186,8 @@ export function AIBriefWidget({ className }: AIBriefWidgetProps) {
         className="ai-brief-refresh"
         onClick={handleRefresh}
         disabled={isLoading}
-        aria-label="Regenerate brief"
-        title="Regenerate brief"
+        aria-label="Force regenerate"
+        title="Force regenerate"
       >
         ↺
       </button>
@@ -133,14 +210,22 @@ export function AIBriefWidget({ className }: AIBriefWidgetProps) {
       )}
 
       {state.status === "success" && (
-        <div className="ai-brief-content">
-          {parseBriefLines(state.data.brief).map((line, index) => (
-            <p key={index} className="ai-brief-line">
-              <span className="ai-brief-line__num">{index + 1}</span>
-              {line}
+        <>
+          <div className="ai-brief-content">
+            {parseBriefLines(state.data.brief).map((line, index) => (
+              <p key={index} className="ai-brief-line">
+                <span className="ai-brief-line__num">{index + 1}</span>
+                {line}
+              </p>
+            ))}
+          </div>
+          {state.fromCache && (
+            <p className="ai-brief-meta">
+              Generated today at{" "}
+              {formatGeneratedTime(state.data.generatedAt)}
             </p>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );

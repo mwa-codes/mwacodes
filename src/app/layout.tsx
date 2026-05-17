@@ -19,7 +19,7 @@ const faviconSvg =
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>";
 
 export const metadata: Metadata = {
-  title: "Developer Dashboard",
+  title: "MWA Dashboard",
   description: "Personal AI start page for developers",
   icons: {
     icon: `data:image/svg+xml,${encodeURIComponent(faviconSvg)}`,

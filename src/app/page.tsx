@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { AIBriefWidget } from "../components/AIBriefWidget";
+import { HNWidget } from "../components/HNWidget";
 import { AddLinkInput } from "../components/AddLinkInput";
 import { ClockWidget } from "../components/ClockWidget";
 import { GitHubWidget } from "../components/GitHubWidget";
@@ -42,6 +42,14 @@ export default function DashboardPage() {
             <Link className="dashboard-header__nav" href="/links">
               My Links →
             </Link>
+            <a
+              className="dashboard-header__nav"
+              href="https://mwadev.me"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Portfolio →
+            </a>
             <span className="dashboard-header__date" suppressHydrationWarning>
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
@@ -58,9 +66,9 @@ export default function DashboardPage() {
           </DashboardCard>
         </section>
 
-        <section className="dashboard-slot--brief" aria-label="AI morning brief">
+        <section className="dashboard-slot--brief" aria-label="Hacker News">
           <DashboardCard className="dashboard-card--brief" delayIndex={1}>
-            <AIBriefWidget />
+            <HNWidget />
           </DashboardCard>
         </section>
 

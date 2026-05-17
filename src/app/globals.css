@@ -1047,6 +1047,160 @@ body {
   margin-top: 0.2rem;
 }
 
+.ai-brief-meta {
+  margin: 0.5rem 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
+}
+
+/* Hacker News widget */
+.hn-widget {
+  overflow: hidden;
+}
+
+.hn-widget__content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.hn-widget__header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding-right: 2.25rem;
+}
+
+.hn-widget__icon {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: #ff6600;
+}
+
+.hn-widget__heading {
+  padding-right: 0;
+}
+
+.hn-widget__updated {
+  margin: -0.35rem 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
+}
+
+.hn-skeleton {
+  gap: 0.4rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hn-skeleton__row {
+  width: 100%;
+  height: 1.1rem;
+}
+
+.hn-widget__error {
+  margin-top: 0.5rem;
+}
+
+.hn-widget__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.15rem 0 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 211, 238, 0.28) transparent;
+}
+
+.hn-widget__list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.hn-widget__list::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.28);
+  border-radius: 2px;
+}
+
+.hn-widget__row {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr auto;
+  align-items: start;
+  gap: 0.4rem 0.5rem;
+  padding: 0.2rem 0.2rem;
+  margin: 0 -0.2rem;
+  border-radius: 2px;
+  transition: background 0.15s ease;
+}
+
+.hn-widget__row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hn-widget__rank {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--accent);
+  opacity: 0.75;
+  line-height: 1.45;
+  padding-top: 0.05rem;
+}
+
+.hn-widget__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.hn-widget__title {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(0.78rem, 1.4vw, 0.88rem);
+  line-height: 1.35;
+  color: var(--fg);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.hn-widget__title:hover {
+  color: var(--accent);
+}
+
+.hn-widget__domain {
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  color: var(--fg-dim);
+}
+
+.hn-widget__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  flex-shrink: 0;
+  font-size: 0.58rem;
+  color: var(--fg-dim);
+  line-height: 1.35;
+  padding-top: 0.05rem;
+}
+
+.hn-widget__score {
+  white-space: nowrap;
+}
+
+.hn-widget__comments {
+  white-space: nowrap;
+}
+
 /* Bookmarks widget */
 .bookmarks-widget {
   flex: 1;
@@ -1831,6 +1985,19 @@ body {
   color: var(--accent);
   border-color: rgba(34, 211, 238, 0.35);
   background: rgba(34, 211, 238, 0.08);
+}
+
+.links-filter__badge {
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  border-radius: 2px;
+  vertical-align: middle;
 }
 
 .links-page__count {

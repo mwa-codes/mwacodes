@@ -13,6 +13,8 @@ import {
 import type { SavedLink } from "@/types/link";
 
 const SEARCH_DEBOUNCE_MS = 400;
+
+type TypeCounts = Record<LinkTypeFilter, number>;
 const SKELETON_COUNT = 9;
 
 function PlayIcon() {
@@ -142,8 +144,42 @@ export default function LinksPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeType, setActiveType] = useState<LinkTypeFilter>("all");
   const [links, setLinks] = useState<SavedLink[]>([]);
+  const [typeCounts, setTypeCounts] = useState<TypeCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch("/api/links");
+        if (!response.ok || cancelled) return;
+
+        const data = (await response.json()) as SavedLink[];
+        if (cancelled) return;
+
+        const counts = { all: data.length } as TypeCounts;
+        for (const filter of LINK_TYPE_FILTERS) {
+          if (filter.id !== "all") {
+            counts[filter.id] = 0;
+          }
+        }
+        for (const link of data) {
+          counts[link.type] = (counts[link.type] ?? 0) + 1;
+        }
+        setTypeCounts(counts);
+      } catch {
+        if (!cancelled) {
+          setTypeCounts(null);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -197,7 +233,20 @@ export default function LinksPage() {
     try {
       const response = await fetch(`/api/links/${id}`, { method: "DELETE" });
       if (response.ok) {
-        setLinks((prev) => prev.filter((link) => link.id !== id));
+        setLinks((prev) => {
+          const removed = prev.find((link) => link.id === id);
+          if (removed) {
+            setTypeCounts((counts) => {
+              if (!counts) return counts;
+              return {
+                ...counts,
+                all: Math.max(0, counts.all - 1),
+                [removed.type]: Math.max(0, counts[removed.type] - 1),
+              };
+            });
+          }
+          return prev.filter((link) => link.id !== id);
+        });
       }
     } finally {
       setDeletingId(null);
@@ -252,6 +301,11 @@ export default function LinksPage() {
                 onClick={() => setActiveType(filter.id)}
               >
                 {filter.label}
+                {typeCounts && (
+                  <span className="links-filter__badge">
+                    {typeCounts[filter.id]}
+                  </span>
+                )}
               </button>
             ))}
           </div>
