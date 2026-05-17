@@ -2053,6 +2053,40 @@ body {
   box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.2);
 }
 
+.links-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.links-export__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.links-export__select {
+  padding: 0.35rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.links-export__select:hover,
+.links-export__select:focus {
+  border-color: rgba(34, 211, 238, 0.35);
+  outline: none;
+}
+
 .links-filters {
   display: flex;
   flex-wrap: wrap;

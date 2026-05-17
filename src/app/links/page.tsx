@@ -10,7 +10,11 @@ import {
   LINK_TYPE_LABELS,
   type LinkTypeFilter,
 } from "@/lib/link-display";
-import { supabase } from "@/lib/supabase";
+import {
+  downloadLinksExport,
+  LINK_EXPORT_FORMATS,
+  type LinkExportFormat,
+} from "@/lib/export-links";
 import type { SavedLink } from "@/types/link";
 
 const SEARCH_DEBOUNCE_MS = 400;
@@ -148,6 +152,8 @@ export default function LinksPage() {
   const [typeCounts, setTypeCounts] = useState<TypeCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [exportFormat, setExportFormat] = useState<LinkExportFormat>("markdown");
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -229,23 +235,19 @@ export default function LinksPage() {
   }, [debouncedSearch, activeType]);
 
   const handleExport = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("links")
-      .select("*")
-      .order("created_at", { ascending: false });
+    setExporting(true);
+    try {
+      const response = await fetch("/api/links");
+      if (!response.ok) return;
 
-    if (error || !data) return;
-
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    const date = new Date().toISOString().slice(0, 10);
-    anchor.href = url;
-    anchor.download = `mwa-links-${date}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }, []);
+      const data = (await response.json()) as SavedLink[];
+      downloadLinksExport(data, exportFormat);
+    } catch {
+      // ignore export errors
+    } finally {
+      setExporting(false);
+    }
+  }, [exportFormat]);
 
   const handleDelete = useCallback(async (id: string) => {
     setDeletingId(id);
@@ -301,13 +303,34 @@ export default function LinksPage() {
                 and more.
               </p>
             </div>
-            <button
-              type="button"
-              className="links-filter"
-              onClick={handleExport}
-            >
-              ↓ Export
-            </button>
+            <div className="links-export">
+              <label className="links-export__field">
+                <span className="links-search__label">Format</span>
+                <select
+                  className="links-export__select"
+                  value={exportFormat}
+                  onChange={(event) =>
+                    setExportFormat(event.target.value as LinkExportFormat)
+                  }
+                  disabled={exporting}
+                  aria-label="Export format"
+                >
+                  {LINK_EXPORT_FORMATS.map((format) => (
+                    <option key={format.id} value={format.id}>
+                      {format.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="links-filter"
+                onClick={() => void handleExport()}
+                disabled={exporting}
+              >
+                {exporting ? "Exporting…" : "↓ Export"}
+              </button>
+            </div>
           </div>
         </header>
 
