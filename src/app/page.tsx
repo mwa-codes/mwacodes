@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { CommandPalette } from "../components/CommandPalette";
 import { HNWidget } from "../components/HNWidget";
 import { AddLinkInput } from "../components/AddLinkInput";
@@ -14,8 +14,23 @@ import { SnippetsWidget } from "../components/SnippetsWidget";
 import { PomodoroWidget } from "../components/PomodoroWidget";
 import { CurrencyWidget } from "../components/CurrencyWidget";
 import { WeatherWidget } from "../components/WeatherWidget";
+import { WeeklySummaryWidget } from "../components/WeeklySummaryWidget";
 
-const STAGGER_MS = [0, 80, 160, 240, 320, 400, 480, 560, 640, 720] as const;
+const STAGGER_MS = [
+  0, 80, 160, 240, 320, 400, 480, 560, 640, 720, 800,
+] as const;
+
+function subscribeNoop(): () => void {
+  return () => {};
+}
+
+function useIsMonday(): boolean {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => new Date().getDay() === 1,
+    () => false,
+  );
+}
 
 function DashboardCard({
   children,
@@ -39,6 +54,7 @@ function DashboardCard({
 export default function DashboardPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const isMonday = useIsMonday();
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -107,6 +123,17 @@ export default function DashboardPage() {
             onLinkSaved={() => setRefreshTrigger((t) => t + 1)}
           />
         </section>
+
+        {isMonday && (
+          <section
+            className="dashboard-slot--weekly-summary"
+            aria-label="Weekly summary"
+          >
+            <DashboardCard delayIndex={10}>
+              <WeeklySummaryWidget />
+            </DashboardCard>
+          </section>
+        )}
 
         <section className="dashboard-slot--weather" aria-label="Weather">
           <DashboardCard delayIndex={2}>

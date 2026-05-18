@@ -134,50 +134,56 @@ body {
   grid-row: 3;
 }
 
+.dashboard-slot--weekly-summary {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  min-height: 7rem;
+}
+
 .dashboard-slot--weather {
   grid-column: 1 / 4;
-  grid-row: 4;
+  grid-row: 5;
 }
 
 .dashboard-slot--goals {
   grid-column: 4 / 8;
-  grid-row: 4;
+  grid-row: 5;
   min-height: 10rem;
 }
 
 .dashboard-slot--github {
   grid-column: 8 / 13;
-  grid-row: 4;
+  grid-row: 5;
   min-height: 10rem;
 }
 
 .dashboard-slot--saved-links {
   grid-column: 1 / -1;
-  grid-row: 5;
+  grid-row: 6;
   min-height: 8rem;
 }
 
 .dashboard-slot--scratchpad {
   grid-column: 1 / 7;
-  grid-row: 6;
+  grid-row: 7;
   min-height: 10rem;
 }
 
 .dashboard-slot--snippets {
   grid-column: 7 / 13;
-  grid-row: 6;
+  grid-row: 7;
   min-height: 10rem;
 }
 
 .dashboard-slot--pomodoro {
   grid-column: 1 / 5;
-  grid-row: 7;
+  grid-row: 8;
   min-height: 12rem;
 }
 
 .dashboard-slot--currency {
   grid-column: 5 / 9;
-  grid-row: 7;
+  grid-row: 8;
   min-height: 12rem;
 }
 
@@ -193,6 +199,7 @@ body {
 
 @media (max-width: 900px) {
   .dashboard-slot--add-link,
+  .dashboard-slot--weekly-summary,
   .dashboard-slot--saved-links,
   .dashboard-slot--scratchpad,
   .dashboard-slot--snippets,
@@ -234,6 +241,7 @@ body {
   }
 
   .dashboard-slot--add-link,
+  .dashboard-slot--weekly-summary,
   .dashboard-slot--saved-links,
   .dashboard-slot--scratchpad,
   .dashboard-slot--snippets,

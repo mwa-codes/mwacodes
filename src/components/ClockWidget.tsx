@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type ClockWidgetProps = {
   className?: string;
@@ -35,6 +35,13 @@ const QUOTES = [
     author: "Kent Beck",
   },
 ] as const;
+
+const QUOTE_API_URL =
+  "https://api.quotable.io/quotes/random?tags=technology,wisdom,inspirational&maxLength=120";
+const QUOTE_STORAGE_KEY = "daily_quote";
+
+type Quote = { text: string; author: string };
+type CachedQuote = Quote & { date: string };
 
 function ClockSkeleton() {
   return (
@@ -74,6 +81,77 @@ function getQuoteIndex(date: Date, tz?: string): number {
   return (index >= 0 ? index : date.getDay()) % QUOTES.length;
 }
 
+function getFallbackQuote(date: Date, tz?: string): Quote {
+  return QUOTES[getQuoteIndex(date, tz)];
+}
+
+function todayDateString(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function readCachedQuote(): CachedQuote | null {
+  try {
+    const raw = localStorage.getItem(QUOTE_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      "text" in parsed &&
+      "author" in parsed &&
+      "date" in parsed &&
+      typeof parsed.text === "string" &&
+      typeof parsed.author === "string" &&
+      typeof parsed.date === "string"
+    ) {
+      return {
+        text: parsed.text,
+        author: parsed.author,
+        date: parsed.date,
+      };
+    }
+  } catch {
+    /* ignore corrupt cache */
+  }
+  return null;
+}
+
+function writeCachedQuote(quote: Quote, date: string): void {
+  try {
+    localStorage.setItem(
+      QUOTE_STORAGE_KEY,
+      JSON.stringify({ text: quote.text, author: quote.author, date }),
+    );
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+async function fetchQuoteFromApi(): Promise<Quote | null> {
+  try {
+    const res = await fetch(QUOTE_API_URL);
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    if (
+      data &&
+      typeof data === "object" &&
+      "content" in data &&
+      "author" in data &&
+      typeof data.content === "string" &&
+      typeof data.author === "string"
+    ) {
+      return { text: data.content, author: data.author };
+    }
+  } catch {
+    /* silent fallback */
+  }
+  return null;
+}
+
 function formatDate(date: Date, tz?: string): string {
   return new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
@@ -106,22 +184,52 @@ function getTimeParts(date: Date, tz?: string) {
 export function ClockWidget({ className, timezone }: ClockWidgetProps) {
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const [quote, setQuote] = useState<Quote>(() =>
+    getFallbackQuote(new Date(), timezone),
+  );
 
   useEffect(() => {
-    const mountId = requestAnimationFrame(() => setMounted(true));
+    let cancelled = false;
+
+    const mountId = requestAnimationFrame(() => {
+      const today = todayDateString();
+      const cached = readCachedQuote();
+
+      if (cached?.date === today) {
+        setQuote({ text: cached.text, author: cached.author });
+      } else {
+        setQuote(getFallbackQuote(new Date(), timezone));
+        void fetchQuoteFromApi().then((fetched) => {
+          if (cancelled || !fetched) return;
+          setQuote(fetched);
+          writeCachedQuote(fetched, today);
+        });
+      }
+
+      setMounted(true);
+    });
+
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => {
+      cancelled = true;
       cancelAnimationFrame(mountId);
       clearInterval(id);
     };
-  }, []);
+  }, [timezone]);
+
+  const refreshQuote = useCallback(async () => {
+    const today = todayDateString();
+    const fetched = await fetchQuoteFromApi();
+    const next = fetched ?? getFallbackQuote(new Date(), timezone);
+    setQuote(next);
+    writeCachedQuote(next, today);
+  }, [timezone]);
 
   if (!mounted) {
     return <ClockSkeleton />;
   }
 
   const greeting = getGreeting(now, timezone);
-  const quote = QUOTES[getQuoteIndex(now, timezone)];
   const dateLabel = formatDate(now, timezone);
   const timeParts = getTimeParts(now, timezone);
 
@@ -156,8 +264,37 @@ export function ClockWidget({ className, timezone }: ClockWidgetProps) {
       </p>
 
       <blockquote className="clock-quote">
-        <p className="clock-quote__text">&ldquo;{quote.text}&rdquo;</p>
-        <cite className="clock-quote__author">{quote.author}</cite>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "0.35rem",
+          }}
+        >
+          <p className="clock-quote__text" style={{ flex: 1, margin: 0 }}>
+            &ldquo;{quote.text}&rdquo;
+          </p>
+          <button
+            type="button"
+            onClick={() => void refreshQuote()}
+            aria-label="Fetch another quote"
+            style={{
+              flexShrink: 0,
+              margin: 0,
+              padding: 0,
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              fontSize: "0.65rem",
+              lineHeight: 1,
+              color: "var(--fg-dim)",
+              opacity: 0.55,
+            }}
+          >
+            ↺
+          </button>
+        </div>
+        <cite className="clock-quote__author">— {quote.author}</cite>
       </blockquote>
     </div>
   );
