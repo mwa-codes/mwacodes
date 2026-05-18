@@ -100,6 +100,15 @@ export function BookmarksWidget({ className }: BookmarksWidgetProps) {
 
   return (
     <div className={`bookmarks-widget ${className ?? ""}`}>
+      <header className="bookmarks-widget__header">
+        <span className="bookmarks-widget__label">
+          <span className="bookmarks-widget__icon" aria-hidden>
+            🔖
+          </span>
+          Quick Links
+        </span>
+      </header>
+
       <div className="bookmarks-tabs" role="tablist" aria-label="Bookmark categories">
         {TABS.map((tab) => (
           <button

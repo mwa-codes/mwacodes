@@ -15,9 +15,10 @@ import { PomodoroWidget } from "../components/PomodoroWidget";
 import { CurrencyWidget } from "../components/CurrencyWidget";
 import { WeatherWidget } from "../components/WeatherWidget";
 import { WeeklySummaryWidget } from "../components/WeeklySummaryWidget";
+import { BookmarksWidget } from "../components/BookmarksWidget";
 
 const STAGGER_MS = [
-  0, 80, 160, 240, 320, 400, 480, 560, 640, 720, 800,
+  0, 80, 160, 240, 320, 400, 480, 560, 640, 720, 800, 880,
 ] as const;
 
 function subscribeNoop(): () => void {
@@ -150,6 +151,12 @@ export default function DashboardPage() {
         <section className="dashboard-slot--currency" aria-label="Exchange rates">
           <DashboardCard delayIndex={9}>
             <CurrencyWidget />
+          </DashboardCard>
+        </section>
+
+        <section className="dashboard-slot--bookmarks" aria-label="Quick links">
+          <DashboardCard delayIndex={11}>
+            <BookmarksWidget />
           </DashboardCard>
         </section>
 
