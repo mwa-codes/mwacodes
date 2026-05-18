@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -799,6 +800,10 @@ export function ScratchpadWidget({ className }: ScratchpadWidgetProps) {
               ))}
             </div>
           )}
+
+          <Link className="scratchpad-widget__view-all" href="/notes">
+            View all notes →
+          </Link>
         </section>
       </div>
     </>

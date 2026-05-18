@@ -11,9 +11,11 @@ import { GitHubWidget } from "../components/GitHubWidget";
 import { SavedLinksWidget } from "../components/SavedLinksWidget";
 import { ScratchpadWidget } from "../components/ScratchpadWidget";
 import { SnippetsWidget } from "../components/SnippetsWidget";
+import { PomodoroWidget } from "../components/PomodoroWidget";
+import { CurrencyWidget } from "../components/CurrencyWidget";
 import { WeatherWidget } from "../components/WeatherWidget";
 
-const STAGGER_MS = [0, 80, 160, 240, 320, 400, 480, 560] as const;
+const STAGGER_MS = [0, 80, 160, 240, 320, 400, 480, 560, 640, 720] as const;
 
 function DashboardCard({
   children,
@@ -67,6 +69,9 @@ export default function DashboardPage() {
             <Link className="dashboard-header__nav" href="/links">
               My Links →
             </Link>
+            <Link className="dashboard-header__nav" href="/notes">
+              Notes →
+            </Link>
             <a
               className="dashboard-header__nav"
               href="https://mwadev.me"
@@ -106,6 +111,18 @@ export default function DashboardPage() {
         <section className="dashboard-slot--weather" aria-label="Weather">
           <DashboardCard delayIndex={2}>
             <WeatherWidget />
+          </DashboardCard>
+        </section>
+
+        <section className="dashboard-slot--pomodoro" aria-label="Pomodoro timer">
+          <DashboardCard delayIndex={8}>
+            <PomodoroWidget />
+          </DashboardCard>
+        </section>
+
+        <section className="dashboard-slot--currency" aria-label="Exchange rates">
+          <DashboardCard delayIndex={9}>
+            <CurrencyWidget />
           </DashboardCard>
         </section>
 

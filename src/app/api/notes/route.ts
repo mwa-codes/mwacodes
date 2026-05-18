@@ -16,10 +16,6 @@ type CreateNoteBody = {
   content?: string;
 };
 
-function escapePostgrestValue(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
-}
-
 function formatPreview(content: string): string {
   return content.trim().split("\n")[0].slice(0, 80);
 }
@@ -44,8 +40,7 @@ export async function GET(
     .order("created_at", { ascending: false });
 
   if (search) {
-    const pattern = escapePostgrestValue(`%${search}%`);
-    query = query.or(`content.ilike.${pattern},preview.ilike.${pattern}`);
+    query = query.ilike("content", `%${search}%`);
   }
 
   const { data, error } = await query;
