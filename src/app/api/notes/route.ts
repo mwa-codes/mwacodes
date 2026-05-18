@@ -16,6 +16,10 @@ type CreateNoteBody = {
   content?: string;
 };
 
+function escapePostgrestValue(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
 function formatPreview(content: string): string {
   return content.trim().split("\n")[0].slice(0, 80);
 }
@@ -28,11 +32,23 @@ function formatWriteError(message: string, code?: string): string {
   return process.env.NODE_ENV === "development" ? message : "Failed to save note";
 }
 
-export async function GET(): Promise<NextResponse<Note[] | NotesApiError>> {
-  const { data, error } = await getSupabaseServer()
+export async function GET(
+  request: Request,
+): Promise<NextResponse<Note[] | NotesApiError>> {
+  const { searchParams } = new URL(request.url);
+  const search = searchParams.get("search")?.trim();
+
+  let query = getSupabaseServer()
     .from("notes")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (search) {
+    const pattern = escapePostgrestValue(`%${search}%`);
+    query = query.or(`content.ilike.${pattern},preview.ilike.${pattern}`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json(
